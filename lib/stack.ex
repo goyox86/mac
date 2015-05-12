@@ -10,7 +10,7 @@ defmodule Mac.Stack do
 
   def top(stack) do
     [val | _rest ] = stack
-    val
+    {stack, val}
   end
 end
 

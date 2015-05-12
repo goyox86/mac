@@ -77,6 +77,9 @@ defmodule Mac do
     _run(tail, stack, registers, instructions)
   end
 
+  """
+    Evaluates non-control flow instructions.
+  """
   def eval(:nop, stack, registers, instructions) do
     {stack, registers, instructions}
   end
@@ -152,7 +155,7 @@ defmodule Mac do
   end
 
   def eval({:gpt, register}, stack, registers, instructions) do
-    val = Mac.Stack.top(stack)
+    {stack, val} = Mac.Stack.top(stack)
     registers = Mac.Registers.set(registers, register, val)
 
     {stack, registers, instructions}
