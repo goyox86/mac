@@ -1,6 +1,8 @@
 defmodule MacTest do
   use ExUnit.Case
 
+  #TODO: Test branching intructions
+
   test "the NOP instruction does not do anything" do
     {stack, registers, instructions} = Mac.eval(:nop, [], %{}, [])
 
@@ -71,5 +73,12 @@ defmodule MacTest do
     {_, registers , _} = Mac.eval({:gpt, :a}, [1, 2], %{a: 0 , b: 0 , c: 0}, [])
 
     assert registers ==  %{a: 1 , b: 0 , c: 0}
+  end
+
+  test "the MOV instruction moves the value stored in register a to register b top and sets register a to 0" do
+    {_, registers , _} = Mac.eval({:set, 1, :a}, [], %{a: 0 , b: 0 , c: 0}, [])
+    {_, registers , _} = Mac.eval({:mov, :a, :b}, [], registers, [])
+
+    assert registers ==  %{a: 0 , b: 1 , c: 0}
   end
 end
