@@ -29,111 +29,25 @@ defmodule Mac do
       {:psh, 5},
       {:psh, 6},
       :add,
-      :prt,
-      {:set, 1, :a},
-      {:prr, :a},
-      {:mov, :a, :c},
-      {:prr, :b},
-      {:prr, :a},
-      {:prr, :c},
-      {:if, :a, 1, 4},
-      {:set, 2, :a},
+      {:gpt, :a},
+      {:if, :a, 11, 8},
+      {:psh, 3},
+      {:psh, 2},
+      :add,
       :prt,
       :hlt
     ]
   end
 
-  def run(instructions) do
   """
-    Runs the given program.
+    Runs the given set of instructions.
   """
   def run(instructions), do:
     _run(instructions, [], %{a: 0, b: 0, c: 0, d: 0, e: 0}, instructions)
 
-  defp _run([:hlt | _], _stack, _registers, _instructions),
-    do: IO.puts("HALTED")
+  defp _run([], stack, registers, instructions), do: nil
 
-  defp _run([:nop | tail], stack, registers, instructions),
-    do: _run(tail, stack, registers, instructions)
-
-
-  defp _run([{:psh, val} | tail], stack, registers, instructions) do
-    stack = Mac.Stack.push(stack, val)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([:add | tail], stack, registers, instructions) do
-    {stack, val1} = Mac.Stack.pop(stack)
-    {stack, val2} = Mac.Stack.pop(stack)
-    stack = Mac.Stack.push(stack, val1 + val2)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([:mul | tail], stack, registers, instructions) do
-    {stack, val1} = Mac.Stack.pop(stack)
-    {stack, val2} = Mac.Stack.pop(stack)
-    stack = Mac.Stack.push(stack, val1 * val2)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([:div | tail], stack, registers, instructions) do
-    {stack, val1} = Mac.Stack.pop(stack)
-    {stack, val2} = Mac.Stack.pop(stack)
-    stack = Mac.Stack.push(stack, val1 / val2)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([:sub | tail], stack, registers, instructions) do
-    {stack, val1} = Mac.Stack.pop(stack)
-    {stack, val2} = Mac.Stack.pop(stack)
-    stack = Mac.Stack.push(stack, val1 - val2)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([:pop | tail], stack, registers, instructions) do
-    {stack, _val} = Mac.Stack.pop(stack)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([:prt | tail], stack, registers, instructions) do
-    {stack, val} = Mac.Stack.pop(stack)
-    IO.puts(val)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([{:prr, register} | tail], stack, registers, instructions) do
-    IO.puts Mac.Registers.get(registers, register)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([{:set, val, register} | tail], stack, registers, instructions) do
-    registers = Mac.Registers.set(registers, register, val)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([{:gld, register} | tail], stack, registers, instructions) do
-    val = Mac.Registers.get(registers, register)
-    stack = Mac.Stack.push(stack, val)
-
-    _run(tail, stack, registers, instructions)
-  end
-
-  defp _run([{:gpt, register} | tail], stack, registers, instructions) do
-    val = Mac.Stack.top(stack)
-    registers = Mac.Registers.set(registers, register, val)
-
-    _run(tail, stack, registers, instructions)
-  end
-
+  defp _run([:hlt | _], _stack, _registers, _instructions), do: IO.puts("HALTED")
 
   defp _run([{:if, register, val, goto} | tail], stack, registers, instructions) do
     register_val = Mac.Registers.get(registers, register)
@@ -157,10 +71,97 @@ defmodule Mac do
     end
   end
 
-  defp _run([{:mov, orig_register, dest_register} | tail], stack, registers, instructions) do
-    registers = Mac.Registers.move(registers, orig_register, dest_register)
+  defp _run([head | tail], stack, registers, instructions) do
+    {stack, registers, instructions} = eval(head, stack, registers, instructions)
 
     _run(tail, stack, registers, instructions)
+  end
+
+  def eval(:nop, stack, registers, instructions) do
+    {stack, registers, instructions}
+  end
+
+  def eval({:psh, val}, stack, registers, instructions) do
+    stack = Mac.Stack.push(stack, val)
+
+    {stack, registers, instructions}
+  end
+
+  def eval(:add , stack, registers, instructions) do
+    {stack, val1} = Mac.Stack.pop(stack)
+    {stack, val2} = Mac.Stack.pop(stack)
+    stack = Mac.Stack.push(stack, val1 + val2)
+
+    {stack, registers, instructions}
+  end
+
+  def eval(:mul, stack, registers, instructions) do
+    {stack, val1} = Mac.Stack.pop(stack)
+    {stack, val2} = Mac.Stack.pop(stack)
+    stack = Mac.Stack.push(stack, val1 * val2)
+
+    {stack, registers, instructions}
+  end
+
+  def eval(:div, stack, registers, instructions) do
+    {stack, val1} = Mac.Stack.pop(stack)
+    {stack, val2} = Mac.Stack.pop(stack)
+    stack = Mac.Stack.push(stack, val1 / val2)
+
+    {stack, registers, instructions}
+  end
+
+  def eval(:sub, stack, registers, instructions) do
+    {stack, val1} = Mac.Stack.pop(stack)
+    {stack, val2} = Mac.Stack.pop(stack)
+    stack = Mac.Stack.push(stack, val1 - val2)
+
+    {stack, registers, instructions}
+  end
+
+  def eval(:pop, stack, registers, instructions) do
+    {stack, _val} = Mac.Stack.pop(stack)
+
+    {stack, registers, instructions}
+  end
+
+  def eval(:prt, stack, registers, instructions) do
+    {stack, val} = Mac.Stack.pop(stack)
+    IO.puts(val)
+
+    {stack, registers, instructions}
+  end
+
+  def eval({:prr, register}, stack, registers, instructions) do
+    IO.puts Mac.Registers.get(registers, register)
+
+    {stack, registers, instructions}
+  end
+
+  def eval({:set, val, register}, stack, registers, instructions) do
+    registers = Mac.Registers.set(registers, register, val)
+
+    {stack, registers, instructions}
+  end
+
+  def eval({:gld, register}, stack, registers, instructions) do
+    val = Mac.Registers.get(registers, register)
+    stack = Mac.Stack.push(stack, val)
+
+    {stack, registers, instructions}
+  end
+
+  def eval({:gpt, register}, stack, registers, instructions) do
+    val = Mac.Stack.top(stack)
+    registers = Mac.Registers.set(registers, register, val)
+
+    {stack, registers, instructions}
+  end
+
+  def eval({:mov, orig_register, dest_register}, stack, registers, instructions) do
+    registers = Mac.Registers.move(registers, orig_register, dest_register)
+
+    {stack, registers, instructions}
   end
 end
 
