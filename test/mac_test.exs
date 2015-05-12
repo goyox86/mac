@@ -1,7 +1,57 @@
 defmodule MacTest do
   use ExUnit.Case
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "the NOP instruction does not do anything" do
+    {stack, registers, instructions} = Mac.eval(:nop, [], %{}, [])
+
+    assert {stack, registers, instructions} ==  { [], %{}, [] }
+  end
+
+  test "the PSH instruction inserts a value onto the stack not do anything" do
+    {stack, _, _} = Mac.eval({:psh, 1}, [], %{}, [])
+
+    assert stack == [1]
+  end
+
+  test "the ADD instruction pops the two top values from the stack, adds them and pushes the result on the stack" do
+    { stack , _ , _ }  =  Mac.eval({:psh, 5}, [], %{}, [])
+    { stack , _ , _ }  =  Mac.eval({:psh, 6}, stack, %{}, [])
+
+    { stack, _, _ } = Mac.eval(:add, stack, %{}, [])
+
+    assert stack ==  [11]
+  end
+
+  test "the ADD instruction pops the two top values from the stack, multiplies them  and pushes the result on the stack" do
+    { stack, _ , _ }  =  Mac.eval({:psh, 5}, [], %{}, [])
+    { stack, _ , _ }  =  Mac.eval({:psh, 6}, stack, %{}, [])
+
+    {stack, _ , _} = Mac.eval(:mul, stack, %{}, [])
+
+    assert stack == [30]
+  end
+
+  test "the SUB instruction pops the two top values from the stack, substracs them and pushes the result on the stack" do
+    { stack, _ , _ }  =  Mac.eval({:psh, 5}, [], %{}, [])
+    { stack, _ , _ }  =  Mac.eval({:psh, 6}, stack, %{}, [])
+
+    {stack, registers, instructions} = Mac.eval(:sub, stack, %{}, [])
+
+    assert stack == [1]
+  end
+
+  test "the SUB instruction pops the two top values from the stack, divides them and pushes the result on the stack" do
+    { stack, _ , _ }  =  Mac.eval({:psh, 10}, [], %{}, [])
+    { stack, _ , _ }  =  Mac.eval({:psh, 20}, stack, %{}, [])
+
+    { stack, _ , _} = Mac.eval(:div, stack, %{}, [])
+
+    assert stack == [2]
+  end
+
+  test "the POP instruction pops the top value from the stack" do
+    {stack, _ , _} = Mac.eval(:pop, [1], %{}, [])
+
+    assert stack ==  []
   end
 end
