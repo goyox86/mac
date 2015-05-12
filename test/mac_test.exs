@@ -13,7 +13,7 @@ defmodule MacTest do
     assert stack == [1]
   end
 
-  test "the ADD instruction pops the two top values from the stack, adds them and pushes the result on the stack" do
+  test "the ADD instruction pops the two top values from the stack, adds them and pushes the result back on the stack" do
     { stack , _ , _ }  =  Mac.eval({:psh, 5}, [], %{}, [])
     { stack , _ , _ }  =  Mac.eval({:psh, 6}, stack, %{}, [])
 
@@ -22,7 +22,7 @@ defmodule MacTest do
     assert stack ==  [11]
   end
 
-  test "the ADD instruction pops the two top values from the stack, multiplies them  and pushes the result on the stack" do
+  test "the ADD instruction pops the two top values from the stack, multiplies them  and pushes the result back on the stack" do
     { stack, _ , _ }  =  Mac.eval({:psh, 5}, [], %{}, [])
     { stack, _ , _ }  =  Mac.eval({:psh, 6}, stack, %{}, [])
 
@@ -31,7 +31,7 @@ defmodule MacTest do
     assert stack == [30]
   end
 
-  test "the SUB instruction pops the two top values from the stack, substracs them and pushes the result on the stack" do
+  test "the SUB instruction pops the two top values from the stack, substracs them and pushes the result back on the stack" do
     { stack, _ , _ }  =  Mac.eval({:psh, 5}, [], %{}, [])
     { stack, _ , _ }  =  Mac.eval({:psh, 6}, stack, %{}, [])
 
@@ -40,7 +40,7 @@ defmodule MacTest do
     assert stack == [1]
   end
 
-  test "the SUB instruction pops the two top values from the stack, divides them and pushes the result on the stack" do
+  test "the SUB instruction pops the two top values from the stack, divides them and pushes the result back on the stack" do
     { stack, _ , _ }  =  Mac.eval({:psh, 10}, [], %{}, [])
     { stack, _ , _ }  =  Mac.eval({:psh, 20}, stack, %{}, [])
 
