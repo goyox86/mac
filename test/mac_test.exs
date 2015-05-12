@@ -54,4 +54,22 @@ defmodule MacTest do
 
     assert stack ==  []
   end
+
+  test "the SET instruction sets the given register to val" do
+    {_, registers , _} = Mac.eval({:set, 1, :a}, [], %{a: 0 , b: 0 , c: 0}, [])
+
+    assert registers == %{a: 1, b: 0 , c: 0}
+  end
+
+  test "the GLD instruction loads the value on the register onto the stack" do
+    {stack , _ , _} = Mac.eval({:gld, :a}, [], %{a: 1 , b: 0 , c: 0}, [])
+
+    assert stack == [1]
+  end
+
+  test "the GPD instruction puts top on the stack onto the given register" do
+    {_, registers , _} = Mac.eval({:gpt, :a}, [1, 2], %{a: 0 , b: 0 , c: 0}, [])
+
+    assert registers ==  %{a: 1 , b: 0 , c: 0}
+  end
 end
